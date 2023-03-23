@@ -1,0 +1,27 @@
+version: '2.1'
+services:
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.2"
+    hostname: "elasticsearch"
+    container_name: elasticsearch
+    environment:
+      - "discovery.type=single-node"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: [ "CMD", "curl", "-u", "elastic:searchPathRules", "-f", "localhost:9200" ]
+      interval: 30s
+      retries: 10
+
+  search-api:
+    container_name: search-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    links:
+      - elasticsearch
