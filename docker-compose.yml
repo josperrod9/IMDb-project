@@ -14,7 +14,7 @@ services:
       retries: 10
 
   search-api:
-    container_name: search-api
+    container_name: imdb-api
     build:
       context: .
       dockerfile: Dockerfile

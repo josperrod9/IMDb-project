@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>co.empathy.academy</groupId>
-	<artifactId>searchAPI</artifactId>
+	<artifactId>IMDb-project</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>searchAPI</name>
-	<description>Demo project for Spring Boot</description>
+	<name>IMDb-project</name>
+	<description>This project has the objective to build a Search API for IMDb dataset</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

@@ -13,9 +13,9 @@ COPY target target
 # Package stage
 #
 FROM openjdk
-COPY --from=build /workspace/app/target/searchAPI-0.0.1-SNAPSHOT.jar searchAPI.jar
+COPY --from=build /workspace/app/target/IMDb-project-0.0.1-SNAPSHOT.jar IMDb-project.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","searchAPI.jar"]
+ENTRYPOINT ["java","-jar","IMDb-project.jar"]
 
 #compile and run the app packages
 CMD ["./mvnw", "spring-boot:run"]
