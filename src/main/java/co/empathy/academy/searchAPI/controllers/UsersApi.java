@@ -30,7 +30,7 @@ public interface UsersApi {
     ResponseEntity<Collection<User>> findAllUsers();
 
     @GetMapping("/{id}")
-    @Operation(operationId = "findUserById", summary = "Coitooooooo", tags = { "users" },
+    @Operation(operationId = "findUserById", summary = "Get a user by ID", tags = { "users" },
             parameters = { @Parameter(in = ParameterIn.PATH, name = "id", description = "User Id", example = "1")},
             responses = { @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = User.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid User ID supplied", content = @Content),
