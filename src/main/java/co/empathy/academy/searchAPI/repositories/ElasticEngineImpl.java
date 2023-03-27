@@ -24,8 +24,6 @@ public class ElasticEngineImpl implements ElasticEngine{
         this.client = elasticClient;
     }
 
-
-
     @Override
     public Boolean createIndex(String name) {
 
