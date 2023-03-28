@@ -1,4 +1,5 @@
-version: '2.1'
+version: "2"
+
 services:
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.2"
@@ -7,22 +8,19 @@ services:
     environment:
       - "discovery.type=single-node"
       - xpack.security.enabled=false
+      - http.cors.enabled=true
+      - http.cors.allow-origin=https://app.elasticvue.com, http://cerebro:9000
     ports:
       - "9200:9200"
     healthcheck:
       test: [ "CMD", "curl", "-u", "elastic:searchPathRules", "-f", "localhost:9200" ]
       interval: 30s
       retries: 10
-
-  search-api:
-    container_name: imdb-api
-    build:
-      context: .
-      dockerfile: Dockerfile
+  cerebro:
+    image: lmenezes/cerebro
+    container_name: cerebro
+    hostname: "cerebro"
     ports:
-      - "8080:8080"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    links:
-      - elasticsearch
+      - 9000:9000
+    command:
+      - -Dhosts.0.host=http://elasticsearch:9200
