@@ -105,7 +105,7 @@ public class IMDbData {
     public void setPrincipal(Principal principal, Movie movie) {
 
         if (principal != null) {
-            movie.getPrincipal().add(principal);
+            movie.getPrincipals().add(principal);
         }
     }
 
@@ -207,7 +207,7 @@ public class IMDbData {
      */
     public void initializeListMovie(Movie movie){
         movie.setAkas(new ArrayList<Aka>());
-        movie.setPrincipal(new ArrayList<Principal>());
+        movie.setPrincipals(new ArrayList<Principal>());
         movie.setDirectors(new ArrayList<Director>());
     }
 }

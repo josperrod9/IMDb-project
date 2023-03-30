@@ -1,5 +1,7 @@
 package co.empathy.academy.IMDb.services;
 
+import co.elastic.clients.elasticsearch.core.GetResponse;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,6 +10,14 @@ import java.io.IOException;
 
 @Service
 public interface ElasticService {
+
+    /**
+     *
+     * @param name, the index name
+     * @return the index if it exists
+     */
+    Movie getDocFromIndex(String name);
+
     /**
      *
      * @param name, the index name that will be deleted

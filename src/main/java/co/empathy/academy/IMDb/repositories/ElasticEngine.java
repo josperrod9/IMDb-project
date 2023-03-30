@@ -1,5 +1,7 @@
 package co.empathy.academy.IMDb.repositories;
 
+import co.elastic.clients.elasticsearch.core.GetResponse;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +10,14 @@ import java.util.List;
 
 @Repository
 public interface ElasticEngine {
+
+
+    /**
+     *
+     * @param name, the index name
+     * @return the index if it exists
+     */
+    Movie getDocFromIndex(String name);
     /**
      *
      * @param name, the index name

@@ -8,20 +8,43 @@ import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import co.empathy.academy.IMDb.models.Movie;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ElasticEngineImpl implements ElasticEngine{
 
     private final ElasticsearchClient client;
 
-    @Autowired
-    public ElasticEngineImpl(ElasticsearchClient elasticClient) {
-        this.client = elasticClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticEngineImpl.class);
+
+    @Override
+    public Movie getDocFromIndex(String name) {
+
+        try {
+            if (name==null) {
+                throw new RuntimeException("Index name is null");
+            }
+            GetResponse<Movie> response = client.get(g -> g
+                            .index(name)
+                            .id("tt0000001"),
+                    Movie.class
+            );
+            Movie movie = response.source();
+            if (movie != null) {
+                LOGGER.info("Movie title " + movie.getPrimaryTitle());
+            }
+            return movie;
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -32,9 +55,10 @@ public class ElasticEngineImpl implements ElasticEngine{
                 return false;
             }
             CreateIndexResponse createIndexResponse = client.indices().create(c -> c.index(name));
+            LOGGER.info("Index with name: "+name+" has been created");
             return createIndexResponse.acknowledged();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOGGER.info(e.getMessage());
             return false;
         }
     }
@@ -46,7 +70,7 @@ public class ElasticEngineImpl implements ElasticEngine{
 
             DeleteIndexResponse deleteIndexResponse = client.indices().delete(c -> c.index(indexName));
             if (deleteIndexResponse.acknowledged()){
-                System.out.println("Deleted");
+                LOGGER.info("Deleted");
                 return true;
             }
             else
@@ -77,7 +101,7 @@ public class ElasticEngineImpl implements ElasticEngine{
                         .id(movie.getTconst())
                         .document(movie)
                 );
-                System.out.println("Indexed with version " + response.version());
+                LOGGER.info("Indexed with version " + response.version());
                 return true;
             }
 
@@ -109,7 +133,7 @@ public class ElasticEngineImpl implements ElasticEngine{
 
 
                 if (result.errors()) {
-                    System.out.println("Bulk error indexing multiple docs");
+                    LOGGER.info("Bulk error indexing multiple docs");
 
                 } else response=true;
             } catch (IOException e) {

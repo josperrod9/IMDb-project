@@ -3,6 +3,8 @@ package co.empathy.academy.IMDb.controllers;
 import co.empathy.academy.IMDb.models.Movie;
 import co.empathy.academy.IMDb.services.ElasticService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,10 @@ public class IndexController implements IndexAPI{
 
     private final ElasticService elasticService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexController.class);
+
     @PostMapping("/{indexName}/_doc")
-    public ResponseEntity<HttpStatus> indexDoc(@PathVariable String indexName, @RequestBody Movie movie) throws IOException {
+    public ResponseEntity<HttpStatus> indexDoc(@PathVariable String indexName, @RequestBody Movie movie) {
         boolean created = elasticService.indexDoc(indexName, movie);
         if (created)
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -26,8 +30,14 @@ public class IndexController implements IndexAPI{
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    @GetMapping("/{indexName}")
+    public ResponseEntity<Movie> getDocFromIndex(@PathVariable String indexName) {
+        Movie getIndexResponse = elasticService.getDocFromIndex(indexName);
+        return new ResponseEntity<>(getIndexResponse,HttpStatus.OK);
+    }
+
     @DeleteMapping("/{indexName}")
-    public ResponseEntity<HttpStatus> deleteIndex(@PathVariable String indexName) throws IOException {
+    public ResponseEntity<HttpStatus> deleteIndex(@PathVariable String indexName) {
         if(elasticService.deleteIndex(indexName))
             return new ResponseEntity<>(HttpStatus.OK);
         else
