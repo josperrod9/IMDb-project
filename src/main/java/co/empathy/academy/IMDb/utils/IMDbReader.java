@@ -113,7 +113,7 @@ public class IMDbReader {
                 principalsLine=principalsReader.readLine();
 
             while (data.sameId(basicLine,principalsLine)){
-                data.setPrincipal(data.readPrincipal(principalsLine),movie);
+                data.setStarring(data.readPrincipal(principalsLine),movie);
                 principalsLine=principalsReader.readLine();
             }
             return movie;

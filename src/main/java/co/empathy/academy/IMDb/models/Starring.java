@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Principal {
+public class Starring {
     Name name;
     String characters;
 }

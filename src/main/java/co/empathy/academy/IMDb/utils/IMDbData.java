@@ -82,30 +82,30 @@ public class IMDbData {
 
     /**
      *
-     * @param line, a line from the Principal file
-     * @return a Principal object which contains all the necessary info
+     * @param line, a line from the Starring file
+     * @return a Starring object which contains all the necessary info
      */
-    public Principal readPrincipal(String line){
-        Principal principal= new Principal();
+    public Starring readStarring(String line){
+        Starring starring = new Starring();
         if (line != null) {
             String[] fields = line.split("\t");
             Name name= new Name();
             name.setNconst(fields[2]);
-            principal.setName(name);
-            principal.setCharacters(fields[5]);
+            starring.setName(name);
+            starring.setCharacters(fields[5]);
         }
-        return principal;
+        return starring;
     }
 
     /**
      *
-     * @param principal, the Principal object
-     * @param movie, the movie in which the Principal object will be added to
+     * @param starring, the Starring object
+     * @param movie, the movie in which the Starring object will be added to
      */
-    public void setPrincipal(Principal principal, Movie movie) {
+    public void setStarring(Starring starring, Movie movie) {
 
-        if (principal != null) {
-            movie.getPrincipals().add(principal);
+        if (starring != null) {
+            movie.getStarring().add(starring);
         }
     }
 
@@ -203,11 +203,11 @@ public class IMDbData {
 
     /**
      *
-     * @param movie the movie to create new akas, Principal and directors arrays
+     * @param movie the movie to create new akas, starring and directors arrays
      */
     public void initializeListMovie(Movie movie){
         movie.setAkas(new ArrayList<Aka>());
-        movie.setPrincipals(new ArrayList<Principal>());
+        movie.setStarring(new ArrayList<Starring>());
         movie.setDirectors(new ArrayList<Director>());
     }
 }
