@@ -13,11 +13,11 @@ public class IMDbReader {
     private final BufferedReader ratingsReader;
     private final BufferedReader akasReader;
     private final BufferedReader crewReader;
-    private final BufferedReader principalsReader;
+    private final BufferedReader starringReader;
     String ratingLine;
     String akaLine;
     String crewLine;
-    String principalsLine;
+    String starringLine;
     private final int documentsSize = 20000;
     private final IMDbData data;
     public boolean moreLines=true;
@@ -28,7 +28,7 @@ public class IMDbReader {
         this.ratingsReader = reader(ratingsFile);
         this.akasReader = reader(akasFile);
         this.crewReader = reader(crewFile);
-        this.principalsReader = reader(principalsFile);
+        this.starringReader = reader(principalsFile);
         this.data= new IMDbData();
     }
 
@@ -108,13 +108,13 @@ public class IMDbReader {
                 crewLine = crewReader.readLine();
             }
 
-            //set principals
-            while (data.smallerID(principalsLine,basicLine))
-                principalsLine=principalsReader.readLine();
+            //set starring
+            while (data.smallerID(starringLine,basicLine))
+                starringLine = starringReader.readLine();
 
-            while (data.sameId(basicLine,principalsLine)){
-                data.setStarring(data.readPrincipal(principalsLine),movie);
-                principalsLine=principalsReader.readLine();
+            while (data.sameId(basicLine, starringLine)){
+                data.setStarring(data.readStarring(starringLine),movie);
+                starringLine = starringReader.readLine();
             }
             return movie;
 
@@ -134,7 +134,7 @@ public class IMDbReader {
         ratingLine = this.ratingsReader.readLine();
         akaLine = this.akasReader.readLine();
         crewLine = this.crewReader.readLine();
-        principalsLine = this.principalsReader.readLine();
+        starringLine = this.starringReader.readLine();
     }
 
 

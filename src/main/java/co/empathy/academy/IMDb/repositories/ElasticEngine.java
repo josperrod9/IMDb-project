@@ -18,18 +18,35 @@ public interface ElasticEngine {
      * @return the index if it exists
      */
     Movie getDocFromIndex(String name);
+
     /**
      *
      * @param name, the index name
      * @return true if the index was successfully created
      */
     Boolean createIndex(String name);
+
+    /**
+     * Puts the settings of the index
+     *
+     * @throws IOException - If the settings cannot be loaded
+     */
+    void putSettings(String name) throws IOException;
+
+    /**
+     * Puts the mapping of the index
+     *
+     * @throws IOException If the mapping cannot be loaded
+     */
+    void putMapping(String name) throws IOException;
+
     /**
      *
      * @param name, the index name that will be deleted
      * @return true is the index was successfully deleted
      */
     Boolean deleteIndex(String name);
+
     /**
      *
      * @param indexName, the index name
@@ -37,6 +54,7 @@ public interface ElasticEngine {
      * @return true if it was successfully added
      */
     Boolean indexDoc(String indexName, Movie movie);
+
     /**
      * Sends multiple docs in one request
      *

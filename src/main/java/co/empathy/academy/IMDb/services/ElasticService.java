@@ -1,7 +1,5 @@
 package co.empathy.academy.IMDb.services;
 
-import co.elastic.clients.elasticsearch.core.GetResponse;
-import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

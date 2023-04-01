@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @Component
@@ -63,6 +64,35 @@ public class ElasticEngineImpl implements ElasticEngine{
         }
     }
 
+    /**
+     * Puts the settings of the index
+     *
+     * @throws IOException - If the settings cannot be loaded
+     */
+    @Override
+    public void putSettings(String name) throws IOException {
+        client.indices().close(c -> c.index(name));
+
+        InputStream analyzer = getClass().getClassLoader().getResourceAsStream("custom_analyzer.json");
+        client.indices().putSettings(p -> p.index(name).withJson(analyzer));
+
+        client.indices().open(o -> o.index(name));
+        LOGGER.info("Index with name: "+name+" has been setted");
+    }
+
+    /**
+     * Puts the mapping of the index
+     *
+     * @throws IOException If the mapping cannot be loaded
+     */
+    @Override
+    public void putMapping(String name) throws IOException {
+        InputStream mapping = getClass().getClassLoader().getResourceAsStream("mapping.json");
+        client.indices().putMapping(p -> p.index(name).withJson(mapping));
+        LOGGER.info("Index with name: "+name+" has been mapped");
+    }
+
+
 
     @Override
     public Boolean deleteIndex(String indexName) {
@@ -98,7 +128,6 @@ public class ElasticEngineImpl implements ElasticEngine{
             } else {
                 IndexResponse response = client.index(i -> i
                         .index(indexName)
-                        .id(movie.getTconst())
                         .document(movie)
                 );
                 LOGGER.info("Indexed with version " + response.version());
@@ -123,14 +152,13 @@ public class ElasticEngineImpl implements ElasticEngine{
                     br.operations(op -> op
                             .index(idx -> idx
                                     .index(indexName)
-                                    .id(movie.getTconst())
                                     .document(movie)
                             )
                     );
                 }
 
                 BulkResponse result = client.bulk(br.build());
-
+                LOGGER.info("Indexing multiple docs");
 
                 if (result.errors()) {
                     LOGGER.info("Bulk error indexing multiple docs");
