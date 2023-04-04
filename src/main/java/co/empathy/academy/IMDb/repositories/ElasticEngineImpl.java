@@ -97,7 +97,6 @@ public class ElasticEngineImpl implements ElasticEngine{
     @Override
     public Boolean deleteIndex(String indexName) {
         try {
-
             DeleteIndexResponse deleteIndexResponse = client.indices().delete(c -> c.index(indexName));
             if (deleteIndexResponse.acknowledged()){
                 LOGGER.info("Deleted");
@@ -108,15 +107,12 @@ public class ElasticEngineImpl implements ElasticEngine{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
 
     @Override
     public Boolean indexDoc(String indexName, Movie movie) {
         try {
-
             GetResponse<Movie> existsResp = client.get(g -> g
                             .index(indexName)
                             .id(movie.getTconst()),
@@ -133,7 +129,6 @@ public class ElasticEngineImpl implements ElasticEngine{
                 LOGGER.info("Indexed with version " + response.version());
                 return true;
             }
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -141,22 +136,19 @@ public class ElasticEngineImpl implements ElasticEngine{
 
 
     @Override
-
     public Boolean indexMultipleDocs(String indexName, List<Movie> movies) {
         boolean response=false;
         if (!movies.isEmpty()) {
             try {
                 BulkRequest.Builder br = new BulkRequest.Builder();
-
-                for (Movie movie : movies) {
+                movies.forEach(movie -> {
                     br.operations(op -> op
                             .index(idx -> idx
                                     .index(indexName)
                                     .document(movie)
                             )
                     );
-                }
-
+                });
                 BulkResponse result = client.bulk(br.build());
                 LOGGER.info("Indexing multiple docs");
 

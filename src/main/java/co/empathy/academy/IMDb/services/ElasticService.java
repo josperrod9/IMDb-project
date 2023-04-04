@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public interface ElasticService {
@@ -41,4 +42,10 @@ public interface ElasticService {
      */
     void indexIMDbData(MultipartFile basicsFile, MultipartFile ratingFile, MultipartFile akaFile, MultipartFile crewFile, MultipartFile principalsFile) throws IOException;
 
+    /**
+     *
+     * @param taskName, the index name
+     * @return the status of the index
+     */
+    String indexStatus(String taskName);
 }

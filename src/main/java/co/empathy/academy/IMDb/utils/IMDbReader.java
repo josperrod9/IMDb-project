@@ -18,7 +18,6 @@ public class IMDbReader {
     String akaLine;
     String crewLine;
     String starringLine;
-    private final int documentsSize = 20000;
     private final IMDbData data;
     public boolean moreLines=true;
 
@@ -60,71 +59,43 @@ public class IMDbReader {
         String basicLine;
         Movie movie;
         while (moreLines) {
-
             //read basics and create a movie
             basicLine=basicsReader.readLine();
-
-            movie= data.setBasicsLines(basicLine);
-
-
-            if (basicLine == null)
-                moreLines = false;
-
+            movie = data.setBasicsLines(basicLine);
+            if (basicLine == null){
+                moreLines=false;
+                break;
+            }
             //set ratings
-            //if the rating id is smaller that the movie's id read the next line
-            if (data.smallerID(ratingLine,basicLine))
-                ratingLine=ratingsReader.readLine();
-
-            //if they have the same id
             if (data.sameId(basicLine,ratingLine)){
                 //adds the rating info
                 data.setRatings(ratingLine,movie);
                 //and read the next rating line
                 ratingLine=ratingsReader.readLine();
             }
-
             //set aka
-            //there are different aka for a unique movie
-            while (data.smallerID(akaLine,basicLine))
-                //read the next line if the aka´s id is smaller
-                akaLine=akasReader.readLine();
-
             while (data.sameId(basicLine,akaLine)){
                 //if they have the same id, add the aka to the movie
                 data.setAka(data.readAka(akaLine),movie);
                 //read the next line
                 akaLine=akasReader.readLine();
             }
-
             //set directors
-            //if the director id is smaller than the movie´s id, read next
-            if ( data.smallerID(crewLine,basicLine))
-                crewLine = crewReader.readLine();
-
-            //if they have the same id
             if (data.sameId(basicLine, crewLine)) {
                 //adds the director info
                 data.setDirector(crewLine, movie);
                 crewLine = crewReader.readLine();
             }
-
             //set starring
-            while (data.smallerID(starringLine,basicLine))
-                starringLine = starringReader.readLine();
-
             while (data.sameId(basicLine, starringLine)){
                 data.setStarring(data.readStarring(starringLine),movie);
                 starringLine = starringReader.readLine();
             }
             return movie;
-
         }
 
         return null;
     }
-
-
-
 
     /**
      *  read the first line with info
