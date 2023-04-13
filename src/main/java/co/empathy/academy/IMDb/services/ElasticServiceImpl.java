@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
-@EnableAsync
 public class ElasticServiceImpl implements ElasticService{
 
     private final ElasticEngine elasticEngine;
@@ -58,7 +56,7 @@ public class ElasticServiceImpl implements ElasticService{
                 throw new IOException();
 
             IMDbReader imdbReader = new IMDbReader(basicsFile, ratingFile, akasFile, crewFile, principalsFile);
-            int blockMovies = 50000;
+            int blockMovies = 20000;
             String imdbIndex = "imdb";
             //starts reading the first lines
             imdbReader.initializeLines();

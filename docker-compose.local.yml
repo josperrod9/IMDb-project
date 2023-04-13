@@ -18,6 +18,6 @@ services:
     container_name: cerebro
     hostname: "cerebro"
     ports:
-      - 9000:9000
+      - "9000:9000"
     command:
       - -Dhosts.0.host=http://elasticsearch:9200

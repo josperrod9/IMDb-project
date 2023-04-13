@@ -24,7 +24,7 @@ public class IMDbReader {
     private final IMDbData data;
     public boolean moreLines=true;
 
-    public Map<String, Aka> akasMap = new ConcurrentHashMap<>();
+    public Map<String, String[]> ratingMap = new ConcurrentHashMap<>();
 
     public IMDbReader(MultipartFile basicsFile, MultipartFile ratingsFile, MultipartFile akasFile, MultipartFile crewFile,
                       MultipartFile principalsFile) {

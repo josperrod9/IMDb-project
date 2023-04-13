@@ -1,21 +1,15 @@
+#
+# Build stage
+#
 FROM maven AS build
-
-#create the working directory for the application and copying necessary files
-WORKDIR /workspace/app
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-
-#copy java source code and pre-environment configuration files of the artifact
-COPY target target
+COPY src /home/app/src
+COPY pom.xml /home/app/
+RUN mvn -f /home/app clean package
 
 #
 # Package stage
 #
 FROM openjdk
-COPY --from=build /workspace/app/target/IMDb-project-0.0.1-SNAPSHOT.jar IMDb-project.jar
+COPY --from=build /home/app/target/IMDb-project-0.0.1-SNAPSHOT.jar /usr/local/lib/search_app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","IMDb-project.jar"]
-
-#compile and run the app packages
-CMD ["./mvnw", "spring-boot:run"]
+ENTRYPOINT ["java","-jar","/usr/local/lib/search_app.jar"]
