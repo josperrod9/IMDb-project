@@ -23,5 +23,10 @@ public class IMDbReaderTest {
         reader.initializeLines();
         Movie movie= reader.readMovie();
         System.out.println(movie);
+        String number = "tt00000010000001";
+        String number2 = "tt00000010000001";
+        System.out.println(number.length()<number2.length());
+        System.out.println(number.length());
+        System.out.println(Integer.parseInt(number.split("tt")[1])/10);
     }
 }

@@ -1,12 +1,12 @@
 package co.empathy.academy.IMDb.repositories;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.BulkRequest;
-import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.GetResponse;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.empathy.academy.IMDb.models.Movie;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -162,5 +162,27 @@ public class ElasticEngineImpl implements ElasticEngine{
             }
         }
         return response;
+    }
+
+    /**
+     * Performs a query to elasticsearch
+     *
+     * @param query       Query to make
+     * @param maxNHits    Maximum number of hits to return
+     * @param sortOptions Sort options
+     * @return List of movies that match the query
+     */
+    @Override
+    public List<Movie> performQuery(Query query, Integer maxNHits, List<SortOptions> sortOptions) throws IOException {
+        SearchResponse<Movie> response = client.search(s -> s
+                .index("imdb")
+                .query(query)
+                .sort(sortOptions)
+                .size(maxNHits), Movie.class);
+
+        return response.hits().hits().stream()
+                .map(Hit::source)
+                .toList();
+
     }
 }

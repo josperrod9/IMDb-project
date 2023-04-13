@@ -1,7 +1,8 @@
 package co.empathy.academy.IMDb.repositories;
 
-import co.elastic.clients.elasticsearch.core.GetResponse;
-import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.stereotype.Repository;
 
@@ -64,4 +65,14 @@ public interface ElasticEngine {
      * @throws IOException
      */
     Boolean indexMultipleDocs(String indexName, List<Movie> movies) throws IOException;
+
+    /**
+     * Makes a query to elasticsearch
+     *
+     * @param query       Query to make
+     * @param maxNHits    Maximum number of hits to return
+     * @param sortOptions Sort options
+     * @return List of movies that match the query
+     */
+    List<Movie> performQuery(Query query, Integer maxNHits, List<SortOptions> sortOptions) throws IOException;
 }

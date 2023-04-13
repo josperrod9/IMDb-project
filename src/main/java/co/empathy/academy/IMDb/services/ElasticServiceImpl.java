@@ -86,7 +86,7 @@ public class ElasticServiceImpl implements ElasticService{
 
                     //prepare the next list
                     countMovies = 0;
-                    movieList = new ArrayList<>();
+                    movieList.clear();
                     LOGGER.info(("movie list has been cleaned"));
                 }
             }

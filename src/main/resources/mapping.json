@@ -8,13 +8,19 @@
     },
     "primaryTitle": {
       "type": "text",
-      "analyzer": "custom_analyzer",
-      "search_analyzer": "custom_analyzer"
+      "fields": {
+        "raw": {
+          "type": "keyword"
+        }
+      }
     },
     "originalTitle": {
       "type": "text",
-      "analyzer": "custom_analyzer",
-      "search_analyzer": "custom_analyzer"
+      "fields": {
+        "raw": {
+          "type": "keyword"
+        }
+      }
     },
     "isAdult": {
       "type": "boolean"

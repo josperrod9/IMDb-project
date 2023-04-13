@@ -1,5 +1,6 @@
 package co.empathy.academy.IMDb.utils;
 
+import co.empathy.academy.IMDb.models.Aka;
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -7,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class IMDbReader {
     private final BufferedReader basicsReader;
@@ -20,6 +23,8 @@ public class IMDbReader {
     String starringLine;
     private final IMDbData data;
     public boolean moreLines=true;
+
+    public Map<String, Aka> akasMap = new ConcurrentHashMap<>();
 
     public IMDbReader(MultipartFile basicsFile, MultipartFile ratingsFile, MultipartFile akasFile, MultipartFile crewFile,
                       MultipartFile principalsFile) {
@@ -62,34 +67,64 @@ public class IMDbReader {
             //read basics and create a movie
             basicLine=basicsReader.readLine();
             movie = data.setBasicsLines(basicLine);
+            if (movie == null){
+                ratingLine=ratingsReader.readLine();
+                crewLine = crewReader.readLine();
+                while (data.smallerID(akaLine,basicLine))
+                    akaLine=akasReader.readLine();
+                while (data.smallerID(starringLine,basicLine))
+                    starringLine=starringReader.readLine();
+                continue;
+            }
             if (basicLine == null){
                 moreLines=false;
                 break;
             }
             //set ratings
+            //if the rating id is smaller that the movie's id read the next line
+            if (data.smallerID(ratingLine,basicLine))
+                ratingLine=ratingsReader.readLine();
+
+            //if they have the same id
             if (data.sameId(basicLine,ratingLine)){
                 //adds the rating info
                 data.setRatings(ratingLine,movie);
                 //and read the next rating line
                 ratingLine=ratingsReader.readLine();
             }
+
             //set aka
-            while (data.sameId(basicLine,akaLine)){
-                //if they have the same id, add the aka to the movie
-                data.setAka(data.readAka(akaLine),movie);
-                //read the next line
+            //there are different aka for a unique movie
+            while (data.smallerID(akaLine,basicLine))
+                //read the next line if the aka´s id is smaller
                 akaLine=akasReader.readLine();
+
+            while (data.sameId(basicLine,akaLine)){
+                    //if they have the same id, add the aka to the movie
+                    data.setAka(data.readAka(akaLine),movie);
+                    //read the next line
+                    akaLine=akasReader.readLine();
             }
+
             //set directors
+            //if the director id is smaller than the movie´s id, read next
+            if ( data.smallerID(crewLine,basicLine))
+                crewLine = crewReader.readLine();
+
+            //if they have the same id
             if (data.sameId(basicLine, crewLine)) {
                 //adds the director info
                 data.setDirector(crewLine, movie);
                 crewLine = crewReader.readLine();
             }
-            //set starring
-            while (data.sameId(basicLine, starringLine)){
+
+            //set principals
+            while (data.smallerID(starringLine,basicLine))
+                starringLine=starringReader.readLine();
+
+            while (data.sameId(basicLine,starringLine)){
                 data.setStarring(data.readStarring(starringLine),movie);
-                starringLine = starringReader.readLine();
+                starringLine=starringReader.readLine();
             }
             return movie;
         }
@@ -107,6 +142,5 @@ public class IMDbReader {
         crewLine = this.crewReader.readLine();
         starringLine = this.starringReader.readLine();
     }
-
 
 }

@@ -11,7 +11,7 @@ public class IMDbData {
     /**
      *
      * @param line, a line from the title-basics file
-     * @return, a movie with all the basic info
+     * @return a movie with all the basic info or null
      */
     public Movie setBasicsLines(String line) {
         Movie movie = new Movie();
@@ -27,6 +27,10 @@ public class IMDbData {
             movie.setRuntimeMinutes(toInteger(fields[7]));
             movie.setGenres(fields[8].split(","));
             initializeListMovie(movie);
+            boolean isMovie = movie.getTitleType().equals("movie") || movie.getTitleType().equals("tvMovie");
+            if (movie.getIsAdult() || Arrays.asList(movie.getGenres()).contains("Adult") || !isMovie) {
+                return null;
+            }
         }
         return movie;
     }
@@ -57,7 +61,7 @@ public class IMDbData {
             aka.setTitle(fields[2]);
             aka.setRegion(fields[3]);
             aka.setLanguage(fields[4]);
-            aka.setIsOriginalTitle(Boolean.parseBoolean(fields[5]));
+            aka.setIsOriginalTitle(Boolean.parseBoolean(fields[7]));
         }
         return aka;
     }
@@ -129,7 +133,7 @@ public class IMDbData {
      */
 
     public void moviesList(List<Movie> list, Movie movie) {
-        if (movie != null && movie.getIsAdult() != null && !movie.getIsAdult()) {
+        if (movie != null) {
                 list.add(movie);
         }
     }
