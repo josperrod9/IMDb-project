@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/index")
@@ -51,12 +52,22 @@ public class IndexController implements IndexAPI{
                                            @RequestParam("akas") MultipartFile akasFile,
                                            @RequestParam("crew") MultipartFile crewFile,
                                            @RequestParam("principals") MultipartFile principalsFile) {
+
+
+
         try {
+            LOGGER.info("Files received");
             elasticService.indexIMDbData(basicsFile, ratingsFile, akasFile, crewFile, principalsFile);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
         catch (IOException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/status/{taskName}")
+    public ResponseEntity<String> indexStatus(@PathVariable String taskName) throws ExecutionException, InterruptedException {
+        String task = elasticService.indexStatus(taskName);
+        return new ResponseEntity<>(task, HttpStatus.ACCEPTED);
     }
 }

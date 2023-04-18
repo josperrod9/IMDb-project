@@ -1,8 +1,10 @@
 package co.empathy.academy.IMDb.repositories;
 
-import co.elastic.clients.elasticsearch.core.GetResponse;
-import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -18,18 +20,35 @@ public interface ElasticEngine {
      * @return the index if it exists
      */
     Movie getDocFromIndex(String name);
+
     /**
      *
      * @param name, the index name
      * @return true if the index was successfully created
      */
     Boolean createIndex(String name);
+
+    /**
+     * Puts the settings of the index
+     *
+     * @throws IOException - If the settings cannot be loaded
+     */
+    void putSettings(String name) throws IOException;
+
+    /**
+     * Puts the mapping of the index
+     *
+     * @throws IOException If the mapping cannot be loaded
+     */
+    void putMapping(String name) throws IOException;
+
     /**
      *
      * @param name, the index name that will be deleted
      * @return true is the index was successfully deleted
      */
     Boolean deleteIndex(String name);
+
     /**
      *
      * @param indexName, the index name
@@ -37,6 +56,7 @@ public interface ElasticEngine {
      * @return true if it was successfully added
      */
     Boolean indexDoc(String indexName, Movie movie);
+
     /**
      * Sends multiple docs in one request
      *
@@ -46,4 +66,25 @@ public interface ElasticEngine {
      * @throws IOException
      */
     Boolean indexMultipleDocs(String indexName, List<Movie> movies) throws IOException;
+
+    /**
+     * Makes a query to elasticsearch
+     *
+     * @param query       Query to make
+     * @param maxNHits    Maximum number of hits to return
+     * @param sortOptions Sort options
+     * @return List of movies that match the query
+     */
+    List<Movie> performQuery(Query query, Integer maxNHits, List<SortOptions> sortOptions) throws IOException;
+
+    /**
+     * Returns a list of genres
+     *
+     * @return List of genres
+     * @throws IOException If the query fails
+     */
+
+    Facet getGenres() throws IOException;
+
+    Facet getRegions() throws IOException;
 }

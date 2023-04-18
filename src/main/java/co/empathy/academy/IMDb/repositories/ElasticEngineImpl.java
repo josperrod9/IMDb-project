@@ -1,20 +1,31 @@
 package co.empathy.academy.IMDb.repositories;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.BulkRequest;
-import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.GetResponse;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
+import co.empathy.academy.IMDb.models.facets.FacetValue;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -63,11 +74,39 @@ public class ElasticEngineImpl implements ElasticEngine{
         }
     }
 
+    /**
+     * Puts the settings of the index
+     *
+     * @throws IOException - If the settings cannot be loaded
+     */
+    @Override
+    public void putSettings(String name) throws IOException {
+        client.indices().close(c -> c.index(name));
+
+        InputStream analyzer = getClass().getClassLoader().getResourceAsStream("custom_analyzer.json");
+        client.indices().putSettings(p -> p.index(name).withJson(analyzer));
+
+        client.indices().open(o -> o.index(name));
+        LOGGER.info("Index with name: "+name+" has been setted");
+    }
+
+    /**
+     * Puts the mapping of the index
+     *
+     * @throws IOException If the mapping cannot be loaded
+     */
+    @Override
+    public void putMapping(String name) throws IOException {
+        InputStream mapping = getClass().getClassLoader().getResourceAsStream("mapping.json");
+        client.indices().putMapping(p -> p.index(name).withJson(mapping));
+        LOGGER.info("Index with name: "+name+" has been mapped");
+    }
+
+
 
     @Override
     public Boolean deleteIndex(String indexName) {
         try {
-
             DeleteIndexResponse deleteIndexResponse = client.indices().delete(c -> c.index(indexName));
             if (deleteIndexResponse.acknowledged()){
                 LOGGER.info("Deleted");
@@ -78,15 +117,12 @@ public class ElasticEngineImpl implements ElasticEngine{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
 
     @Override
     public Boolean indexDoc(String indexName, Movie movie) {
         try {
-
             GetResponse<Movie> existsResp = client.get(g -> g
                             .index(indexName)
                             .id(movie.getTconst()),
@@ -98,13 +134,11 @@ public class ElasticEngineImpl implements ElasticEngine{
             } else {
                 IndexResponse response = client.index(i -> i
                         .index(indexName)
-                        .id(movie.getTconst())
                         .document(movie)
                 );
                 LOGGER.info("Indexed with version " + response.version());
                 return true;
             }
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,25 +146,21 @@ public class ElasticEngineImpl implements ElasticEngine{
 
 
     @Override
-
     public Boolean indexMultipleDocs(String indexName, List<Movie> movies) {
         boolean response=false;
         if (!movies.isEmpty()) {
             try {
                 BulkRequest.Builder br = new BulkRequest.Builder();
-
-                for (Movie movie : movies) {
+                movies.forEach(movie -> {
                     br.operations(op -> op
                             .index(idx -> idx
                                     .index(indexName)
-                                    .id(movie.getTconst())
                                     .document(movie)
                             )
                     );
-                }
-
+                });
                 BulkResponse result = client.bulk(br.build());
-
+                LOGGER.info("Indexing multiple docs");
 
                 if (result.errors()) {
                     LOGGER.info("Bulk error indexing multiple docs");
@@ -142,5 +172,89 @@ public class ElasticEngineImpl implements ElasticEngine{
             }
         }
         return response;
+    }
+
+    /**
+     * Performs a query to elasticsearch
+     *
+     * @param query       Query to make
+     * @param maxNHits    Maximum number of hits to return
+     * @param sortOptions Sort options
+     * @return List of movies that match the query
+     */
+    @Override
+    public List<Movie> performQuery(Query query, Integer maxNHits, List<SortOptions> sortOptions) throws IOException {
+        SearchResponse<Movie> response = client.search(s -> s
+                .index("imdb")
+                .query(query)
+                .sort(sortOptions)
+                .size(maxNHits), Movie.class);
+
+        return response.hits().hits().stream()
+                .map(Hit::source)
+                .toList();
+
+    }
+
+    /**
+     * Returns a list of genres
+     *
+     * @return List of genres
+     * @throws IOException If the query fails
+     */
+    @Override
+    public Facet getGenres() throws IOException {
+        Query query = BoolQuery.of(b -> b
+                .filter(MatchAllQuery.of(q -> q.queryName("MatchAll"))._toQuery()))._toQuery();
+
+        Aggregation genres = TermsAggregation.of(t -> t.field("genres").size(100))._toAggregation();
+        Map<String, Aggregation> aggs = new HashMap<String, Aggregation>();
+        aggs.put("genres", genres);
+
+        SearchResponse<Movie> response = client.search(b -> b
+                .index("imdb")
+                .size(1000)
+                .query(query)
+                .aggregations(aggs), Movie.class);
+
+        List<FacetValue> values = new ArrayList<>();
+        Aggregate genresAgg = response.aggregations().get("genres");
+        genresAgg.sterms().buckets().array().forEach(bucket -> {
+            values.add(new FacetValue(bucket.key().toLowerCase(), bucket.key().toLowerCase(),
+                    bucket.docCount(), "genres:" + bucket.key().toLowerCase()));
+        });
+        return new Facet("facetGenres", "values", values);
+    }
+
+    /**
+     * Returns a list of countries
+     *
+     * @return List of countries
+     * @throws IOException If the query fails
+     *
+     */
+
+    @Override
+    public Facet getRegions() throws IOException {
+        Query query = BoolQuery.of(b -> b
+                .filter(MatchAllQuery.of(q -> q.queryName("MatchAll"))._toQuery()))._toQuery();
+
+        Aggregation genres = TermsAggregation.of(t -> t.field("akas.region").size(100))._toAggregation();
+        Map<String, Aggregation> aggs = new HashMap<String, Aggregation>();
+        aggs.put("regions", genres);
+
+        SearchResponse<Movie> response = client.search(b -> b
+                .index("imdb")
+                .size(1000)
+                .query(query)
+                .aggregations(aggs), Movie.class);
+
+        List<FacetValue> values = new ArrayList<>();
+        Aggregate regionsAgg = response.aggregations().get("regions");
+        regionsAgg.sterms().buckets().array().forEach(bucket -> {
+            values.add(new FacetValue(bucket.key().toLowerCase(), bucket.key().toLowerCase(),
+                    bucket.docCount(), "region:" + bucket.key().toLowerCase()));
+        });
+        return new Facet("facetRegions", "values", values);
     }
 }
