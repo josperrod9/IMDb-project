@@ -2,6 +2,7 @@ package co.empathy.academy.IMDb.controllers;
 
 
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -45,4 +46,18 @@ public interface SearchAPI {
                                                  @RequestParam(defaultValue = "100") Optional<Integer> maxNHits,
                                                  @RequestParam Optional<String> sortOrder,
                                                  @RequestParam Optional<String> sortBy);
+
+    @Operation(summary = "Get all genres")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of genres found, it can be empty"),
+            @ApiResponse(responseCode = "500", description = "Error searching the genres")
+    })
+    ResponseEntity<Facet> getGenres();
+
+    @Operation(summary = "Get all regions")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of regions found, it can be empty"),
+            @ApiResponse(responseCode = "500", description = "Error searching the regions")
+    })
+    ResponseEntity<Facet> getRegions();
 }

@@ -2,12 +2,19 @@ package co.empathy.academy.IMDb.repositories;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
+import co.empathy.academy.IMDb.models.facets.FacetValue;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +22,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -184,5 +194,67 @@ public class ElasticEngineImpl implements ElasticEngine{
                 .map(Hit::source)
                 .toList();
 
+    }
+
+    /**
+     * Returns a list of genres
+     *
+     * @return List of genres
+     * @throws IOException If the query fails
+     */
+    @Override
+    public Facet getGenres() throws IOException {
+        Query query = BoolQuery.of(b -> b
+                .filter(MatchAllQuery.of(q -> q.queryName("MatchAll"))._toQuery()))._toQuery();
+
+        Aggregation genres = TermsAggregation.of(t -> t.field("genres").size(100))._toAggregation();
+        Map<String, Aggregation> aggs = new HashMap<String, Aggregation>();
+        aggs.put("genres", genres);
+
+        SearchResponse<Movie> response = client.search(b -> b
+                .index("imdb")
+                .size(1000)
+                .query(query)
+                .aggregations(aggs), Movie.class);
+
+        List<FacetValue> values = new ArrayList<>();
+        Aggregate genresAgg = response.aggregations().get("genres");
+        genresAgg.sterms().buckets().array().forEach(bucket -> {
+            values.add(new FacetValue(bucket.key().toLowerCase(), bucket.key().toLowerCase(),
+                    bucket.docCount(), "genres:" + bucket.key().toLowerCase()));
+        });
+        return new Facet("facetGenres", "values", values);
+    }
+
+    /**
+     * Returns a list of countries
+     *
+     * @return List of countries
+     * @throws IOException If the query fails
+     *
+     */
+
+    @Override
+    public Facet getRegions() throws IOException {
+        Query query = BoolQuery.of(b -> b
+                .filter(MatchAllQuery.of(q -> q.queryName("MatchAll"))._toQuery()))._toQuery();
+
+        Aggregation genres = TermsAggregation.of(t -> t.field("akas.region").size(100))._toAggregation();
+        Map<String, Aggregation> aggs = new HashMap<String, Aggregation>();
+        aggs.put("regions", genres);
+
+        SearchResponse<Movie> response = client.search(b -> b
+                .index("imdb")
+                .size(1000)
+                .query(query)
+                .aggregations(aggs), Movie.class);
+
+        List<FacetValue> values = new ArrayList<>();
+        Aggregate regionsAgg = response.aggregations().get("regions");
+        regionsAgg.sterms().buckets().array().forEach(bucket -> {
+            values.add(new FacetValue(bucket.key().toLowerCase(), bucket.key().toLowerCase(),
+                    bucket.docCount(), "region:" + bucket.key().toLowerCase()));
+        });
+        return new Facet("facetRegions", "values", values);
     }
 }

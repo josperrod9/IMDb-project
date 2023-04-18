@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -75,4 +76,15 @@ public interface ElasticEngine {
      * @return List of movies that match the query
      */
     List<Movie> performQuery(Query query, Integer maxNHits, List<SortOptions> sortOptions) throws IOException;
+
+    /**
+     * Returns a list of genres
+     *
+     * @return List of genres
+     * @throws IOException If the query fails
+     */
+
+    Facet getGenres() throws IOException;
+
+    Facet getRegions() throws IOException;
 }

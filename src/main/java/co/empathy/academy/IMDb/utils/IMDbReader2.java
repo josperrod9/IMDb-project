@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class IMDbReader2 {
@@ -15,7 +16,7 @@ public class IMDbReader2 {
     private final BufferedReader akasReader;
     private final BufferedReader crewReader;
     private final BufferedReader principalsReader;
-    private final int documentsSize = 50000;
+    private final int documentsSize = 20000;
 
     private boolean hasDocuments = true;
 
@@ -50,8 +51,6 @@ public class IMDbReader2 {
     public List<Movie> readDocuments() throws IOException {
         List<Movie> result = new ArrayList<>();
         int currentLinesRead = 0;
-
-
         String ratingsLine = null;
         try {
             ratingsLine = ratingsReader.readLine();
@@ -60,11 +59,6 @@ public class IMDbReader2 {
         }
 
         while (currentLinesRead < documentsSize) {
-            if(currentLinesRead<1000){
-                currentLinesRead++;
-                readHeaders();
-                continue;
-            }
             try {
                 String basicsLine = basicsReader.readLine();
 
@@ -110,9 +104,12 @@ public class IMDbReader2 {
                         averageRating, numVotes, akas, directors, starring);
 
                 if (!basics[4].contentEquals("1")) {
+                    boolean isMovie = movie.getTitleType().equals("movie") || movie.getTitleType().equals("tvMovie");
+                    if (movie.getIsAdult() || Arrays.asList(movie.getGenres()).contains("Adult") || !isMovie){
+                        continue;
+                    }
                     result.add(movie);
                 }
-
                 currentLinesRead++;
             } catch (IOException e) {
                 throw new RuntimeException(e);

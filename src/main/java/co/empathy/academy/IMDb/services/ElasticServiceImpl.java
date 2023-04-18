@@ -3,7 +3,8 @@ package co.empathy.academy.IMDb.services;
 import co.empathy.academy.IMDb.models.Movie;
 import co.empathy.academy.IMDb.repositories.ElasticEngine;
 import co.empathy.academy.IMDb.utils.IMDbData;
-import co.empathy.academy.IMDb.utils.IMDbReader;
+import co.empathy.academy.IMDb.utils.IMDbReader2;
+import co.empathy.academy.IMDb.utils.IMDbReader3;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +46,6 @@ public class ElasticServiceImpl implements ElasticService{
 
 
     @Override
-    @Async
     public void indexIMDbData(MultipartFile basicsFile, MultipartFile ratingFile, MultipartFile akasFile, MultipartFile crewFile, MultipartFile principalsFile) throws IOException {
         taskMap.clear();
         taskMap.put("indexing", "started");
@@ -55,41 +54,18 @@ public class ElasticServiceImpl implements ElasticService{
             if (basicsFile.isEmpty()||ratingFile.isEmpty()||akasFile.isEmpty()||crewFile.isEmpty()||principalsFile.isEmpty())
                 throw new IOException();
 
-            IMDbReader imdbReader = new IMDbReader(basicsFile, ratingFile, akasFile, crewFile, principalsFile);
-            int blockMovies = 20000;
+            IMDbReader2 imdbReader = new IMDbReader2(basicsFile, ratingFile, akasFile, crewFile, principalsFile);
             String imdbIndex = "imdb";
             //starts reading the first lines
-            imdbReader.initializeLines();
             //create imdb index
             elasticEngine.createIndex(imdbIndex);
             elasticEngine.putSettings(imdbIndex);
             elasticEngine.putMapping(imdbIndex);
             taskMap.put("indexing", "indexing");
-
-            List<Movie> movieList = new ArrayList<>();
-            Movie movie;
-            int countMovies = 0;
-
-            while (imdbReader.moreLines) {
-                movie = imdbReader.readMovie();
-                if (movie != null) {
-                    //add the movie to the list
-                    data.moviesList(movieList, movie);
-                    countMovies++;
-                }
-                //number of movies that will be indexed together
-                if (countMovies == blockMovies) {
-                    //index a "small" movie's list
-                    elasticEngine.indexMultipleDocs(imdbIndex, movieList);
-
-                    //prepare the next list
-                    countMovies = 0;
-                    movieList.clear();
-                    LOGGER.info(("movie list has been cleaned"));
-                }
+            while (imdbReader.hasDocuments()){
+                List<Movie> movies = imdbReader.readDocuments();
+                elasticEngine.indexMultipleDocs(imdbIndex, movies);
             }
-            //index the last list if is not empty
-            elasticEngine.indexMultipleDocs(imdbIndex, movieList);
             taskMap.put("indexing", "finished");
             LOGGER.info("Indexing finished");
         }

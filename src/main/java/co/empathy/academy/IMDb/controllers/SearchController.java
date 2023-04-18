@@ -1,6 +1,7 @@
 package co.empathy.academy.IMDb.controllers;
 
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
 import co.empathy.academy.IMDb.services.SearchServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -46,4 +47,25 @@ public class SearchController implements SearchAPI{
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, path = "/genres")
+    public ResponseEntity<Facet> getGenres() {
+        try {
+            Facet genres = searchService.getGenres();
+            return ResponseEntity.ok(genres);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, path = "/regions")
+    public ResponseEntity<Facet> getRegions() {
+        try {
+            Facet regions = searchService.getRegions();
+            return ResponseEntity.ok(regions);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }

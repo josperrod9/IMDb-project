@@ -1,14 +1,12 @@
 package co.empathy.academy.IMDb.services;
 
 import co.elastic.clients.elasticsearch._types.SortOptions;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch._types.query_dsl.*;
-
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
 import co.empathy.academy.IMDb.repositories.ElasticEngine;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,5 +92,29 @@ public class SearchServiceImpl implements SearchService{
         Query query = queriesService.mustQuery(filters);
 
         return elasticEngine.performQuery(queriesService.functionScoreQuery(query), maxNHits.orElse(100), sortOptions);
+    }
+
+    /**
+     * Returns a list of genres
+     *
+     * @return List of genres
+     * @throws IOException If the query fails
+     */
+
+    @Override
+    public Facet getGenres() throws IOException {
+        return elasticEngine.getGenres();
+    }
+
+    /**
+     * Returns a list of regions
+     *
+     * @return List of regions
+     * @throws IOException If the query fails
+     */
+
+    @Override
+    public Facet getRegions() throws IOException {
+        return elasticEngine.getRegions();
     }
 }

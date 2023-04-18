@@ -2,6 +2,7 @@ package co.empathy.academy.IMDb.services;
 
 
 import co.empathy.academy.IMDb.models.Movie;
+import co.empathy.academy.IMDb.models.facets.Facet;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,4 +18,8 @@ public interface SearchService {
                                  Optional<Integer> minMinutes, Optional<Double> maxScore,
                                  Optional<Double> minScore, Optional<Integer> maxNHits,
                                  Optional<String> sortOrder, Optional<String> sortBy) throws IOException;
+
+    Facet getGenres() throws IOException;
+
+    Facet getRegions() throws IOException;
 }
