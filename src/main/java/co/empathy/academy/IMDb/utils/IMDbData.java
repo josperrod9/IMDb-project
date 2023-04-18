@@ -3,6 +3,7 @@ package co.empathy.academy.IMDb.utils;
 import co.empathy.academy.IMDb.models.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class IMDbData {
@@ -10,12 +11,11 @@ public class IMDbData {
     /**
      *
      * @param line, a line from the title-basics file
-     * @return, a movie with all the basic info
+     * @return a movie with all the basic info or null
      */
     public Movie setBasicsLines(String line) {
         Movie movie = new Movie();
         if (line != null) {
-
             String[] fields = line.split("\t");
             movie.setTconst(fields[0]);
             movie.setTitleType(fields[1]);
@@ -27,7 +27,10 @@ public class IMDbData {
             movie.setRuntimeMinutes(toInteger(fields[7]));
             movie.setGenres(fields[8].split(","));
             initializeListMovie(movie);
-
+            boolean isMovie = movie.getTitleType().equals("movie") || movie.getTitleType().equals("tvMovie");
+            if (movie.getIsAdult() || Arrays.asList(movie.getGenres()).contains("Adult") || !isMovie) {
+                return null;
+            }
         }
         return movie;
     }
@@ -38,12 +41,10 @@ public class IMDbData {
      * @param movie, the movie
      */
     public void setRatings(String line, Movie movie) {
-
         if (line != null) {
             String[] fields = line.split("\t");
             movie.setAverageRating(Double.parseDouble(fields[1]));
             movie.setNumVotes(Integer.parseInt(fields[2]));
-
         }
     }
 
@@ -56,13 +57,11 @@ public class IMDbData {
     public Aka readAka(String line){
         Aka aka= new Aka();
         if (line != null) {
-
             String[] fields = line.split("\t");
-
             aka.setTitle(fields[2]);
             aka.setRegion(fields[3]);
             aka.setLanguage(fields[4]);
-            aka.setIsOriginalTitle(Boolean.parseBoolean(fields[5]));
+            aka.setIsOriginalTitle(Boolean.parseBoolean(fields[7]));
         }
         return aka;
     }
@@ -73,7 +72,6 @@ public class IMDbData {
      * @param movie, a movie to add the aka in
      */
     public void setAka(Aka aka, Movie movie) {
-
         if (aka != null) {
             //add the aka to the akas list
             movie.getAkas().add(aka);
@@ -103,7 +101,6 @@ public class IMDbData {
      * @param movie, the movie in which the Starring object will be added to
      */
     public void setStarring(Starring starring, Movie movie) {
-
         if (starring != null) {
             movie.getStarring().add(starring);
         }
@@ -115,18 +112,16 @@ public class IMDbData {
      * @param movie, the movie in which the director object will be added to
      */
     public void setDirector(String line,Movie movie){
-
         if (line != null) {
             String[] fields = line.split("\t");
             //read the director field
             String [] directors= fields[1].split(",");
             //add each director to the list
-            for (String directorString:directors){
+            Arrays.stream(directors).forEach(directorString -> {
                 Director director= new Director();
                 director.setNconst(directorString);
                 movie.getDirectors().add(director);
-            }
-
+            });
         }
 
     }
@@ -139,10 +134,8 @@ public class IMDbData {
 
     public void moviesList(List<Movie> list, Movie movie) {
         if (movie != null) {
-            if (movie.getIsAdult() != null && !movie.getIsAdult())
                 list.add(movie);
         }
-
     }
 
     /**
@@ -155,7 +148,6 @@ public class IMDbData {
         int integer;
         try {
             integer = Integer.parseInt(field);
-
         } catch (NumberFormatException e) {
             //no valid value
             integer = -1;

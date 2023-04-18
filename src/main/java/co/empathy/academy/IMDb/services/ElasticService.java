@@ -1,7 +1,5 @@
 package co.empathy.academy.IMDb.services;
 
-import co.elastic.clients.elasticsearch.core.GetResponse;
-import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,4 +41,10 @@ public interface ElasticService {
      */
     void indexIMDbData(MultipartFile basicsFile, MultipartFile ratingFile, MultipartFile akaFile, MultipartFile crewFile, MultipartFile principalsFile) throws IOException;
 
+    /**
+     *
+     * @param taskName, the index name
+     * @return the status of the index
+     */
+    String indexStatus(String taskName);
 }

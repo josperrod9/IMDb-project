@@ -1,5 +1,6 @@
 package co.empathy.academy.IMDb.utils;
 
+import co.empathy.academy.IMDb.models.Aka;
 import co.empathy.academy.IMDb.models.Movie;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -7,20 +8,23 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class IMDbReader {
     private final BufferedReader basicsReader;
     private final BufferedReader ratingsReader;
     private final BufferedReader akasReader;
     private final BufferedReader crewReader;
-    private final BufferedReader principalsReader;
+    private final BufferedReader starringReader;
     String ratingLine;
     String akaLine;
     String crewLine;
-    String principalsLine;
-    private final int documentsSize = 20000;
+    String starringLine;
     private final IMDbData data;
     public boolean moreLines=true;
+
+    public Map<String, String[]> ratingMap = new ConcurrentHashMap<>();
 
     public IMDbReader(MultipartFile basicsFile, MultipartFile ratingsFile, MultipartFile akasFile, MultipartFile crewFile,
                       MultipartFile principalsFile) {
@@ -28,7 +32,7 @@ public class IMDbReader {
         this.ratingsReader = reader(ratingsFile);
         this.akasReader = reader(akasFile);
         this.crewReader = reader(crewFile);
-        this.principalsReader = reader(principalsFile);
+        this.starringReader = reader(principalsFile);
         this.data= new IMDbData();
     }
 
@@ -60,16 +64,22 @@ public class IMDbReader {
         String basicLine;
         Movie movie;
         while (moreLines) {
-
             //read basics and create a movie
             basicLine=basicsReader.readLine();
-
-            movie= data.setBasicsLines(basicLine);
-
-
-            if (basicLine == null)
-                moreLines = false;
-
+            movie = data.setBasicsLines(basicLine);
+            if (movie == null){
+                ratingLine=ratingsReader.readLine();
+                crewLine = crewReader.readLine();
+                while (data.smallerID(akaLine,basicLine))
+                    akaLine=akasReader.readLine();
+                while (data.smallerID(starringLine,basicLine))
+                    starringLine=starringReader.readLine();
+                continue;
+            }
+            if (basicLine == null){
+                moreLines=false;
+                break;
+            }
             //set ratings
             //if the rating id is smaller that the movie's id read the next line
             if (data.smallerID(ratingLine,basicLine))
@@ -90,10 +100,10 @@ public class IMDbReader {
                 akaLine=akasReader.readLine();
 
             while (data.sameId(basicLine,akaLine)){
-                //if they have the same id, add the aka to the movie
-                data.setAka(data.readAka(akaLine),movie);
-                //read the next line
-                akaLine=akasReader.readLine();
+                    //if they have the same id, add the aka to the movie
+                    data.setAka(data.readAka(akaLine),movie);
+                    //read the next line
+                    akaLine=akasReader.readLine();
             }
 
             //set directors
@@ -109,22 +119,18 @@ public class IMDbReader {
             }
 
             //set principals
-            while (data.smallerID(principalsLine,basicLine))
-                principalsLine=principalsReader.readLine();
+            while (data.smallerID(starringLine,basicLine))
+                starringLine=starringReader.readLine();
 
-            while (data.sameId(basicLine,principalsLine)){
-                data.setStarring(data.readPrincipal(principalsLine),movie);
-                principalsLine=principalsReader.readLine();
+            while (data.sameId(basicLine,starringLine)){
+                data.setStarring(data.readStarring(starringLine),movie);
+                starringLine=starringReader.readLine();
             }
             return movie;
-
         }
 
         return null;
     }
-
-
-
 
     /**
      *  read the first line with info
@@ -134,8 +140,7 @@ public class IMDbReader {
         ratingLine = this.ratingsReader.readLine();
         akaLine = this.akasReader.readLine();
         crewLine = this.crewReader.readLine();
-        principalsLine = this.principalsReader.readLine();
+        starringLine = this.starringReader.readLine();
     }
-
 
 }

@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.2"
+    image: "josperrod17/imdb-api:elasticsearch"
     hostname: "elasticsearch"
     container_name: elasticsearch
     environment:
@@ -13,6 +13,15 @@ services:
       test: [ "CMD", "curl", "-u", "elastic:searchPathRules", "-f", "localhost:9200" ]
       interval: 30s
       retries: 10
+
+  cerebro:
+    image: lmenezes/cerebro
+    container_name: cerebro
+    hostname: "cerebro"
+    ports:
+      - "9000:9000"
+    command:
+      - -Dhosts.0.host=http://elasticsearch:9200
 
   search-api:
     container_name: imdb-api

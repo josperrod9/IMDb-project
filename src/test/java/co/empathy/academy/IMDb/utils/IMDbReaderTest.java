@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class IMDbReaderTest {
     public static void main(String[] args) throws IOException {
@@ -17,11 +18,16 @@ public class IMDbReaderTest {
         MultipartFile akas = new MockMultipartFile("akas.tsv", new FileInputStream(new File("src/test/java/co/empathy/academy/IMDb/data/title.akas.tsv")));
         MultipartFile crew = new MockMultipartFile("crew.tsv", new FileInputStream(new File("src/test/java/co/empathy/academy/IMDb/data/title.crew.tsv")));
         IMDbReader reader = new IMDbReader(basics, ratings, akas, crew, principals);
+        IMDbReader3 reader2 = new IMDbReader3(basics, ratings, akas, crew, principals);
 //        BufferedReader line = reader.reader(basics);
 //        line.readLine();
 //        System.out.println(line.readLine());
-        reader.initializeLines();
-        Movie movie= reader.readMovie();
-        System.out.println(movie);
+//        reader.initializeLines();
+//        Movie movie= reader.readMovie();
+//        System.out.println(movie);
+//        String number = "tt00000010000001";
+//        String number2 = "tt00000010000001";
+        List<Movie> movies = reader2.readDocuments();
+        System.out.println(movies+" "+reader2.hasDocuments());
     }
 }

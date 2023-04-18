@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @Tag(name = "index", description = "the index API")
 public interface IndexAPI {
@@ -53,4 +54,11 @@ public interface IndexAPI {
                                            @RequestParam("principals") MultipartFile principalsFile
 
     );
+
+    @Operation(summary = "Get the status of the files that are being indexed", tags = { "index" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved",content = @Content(schema = @Schema(implementation =String.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",content = @Content),
+            @ApiResponse(responseCode = "500", description = "Something went wrong while retrieving",content = @Content)})
+    public ResponseEntity<String> indexStatus(@PathVariable String taskName) throws ExecutionException, InterruptedException;
 }
