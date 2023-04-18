@@ -21,7 +21,7 @@ We´ve created an IMDb-like search engine based on different filters using the I
 
 2. Run the project
    ```sh
-   docker-compose up –-build -d
+   docker-compose up --build -d
 
    ```
     ```sh
