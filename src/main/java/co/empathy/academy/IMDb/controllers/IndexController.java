@@ -53,8 +53,6 @@ public class IndexController implements IndexAPI{
                                            @RequestParam("crew") MultipartFile crewFile,
                                            @RequestParam("principals") MultipartFile principalsFile) {
 
-
-
         try {
             LOGGER.info("Files received");
             elasticService.indexIMDbData(basicsFile, ratingsFile, akasFile, crewFile, principalsFile);
