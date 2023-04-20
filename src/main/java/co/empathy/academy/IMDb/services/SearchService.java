@@ -17,7 +17,8 @@ public interface SearchService {
                                  Optional<Integer> minYear, Optional<Integer> maxMinutes,
                                  Optional<Integer> minMinutes, Optional<Double> maxScore,
                                  Optional<Double> minScore, Optional<Integer> maxNHits,
-                                 Optional<String> sortOrder, Optional<String> sortBy) throws IOException;
+                                 Optional<String> sortOrder, Optional<String> sortBy,
+                                 Optional<String> region) throws IOException;
 
     Facet getGenres() throws IOException;
 

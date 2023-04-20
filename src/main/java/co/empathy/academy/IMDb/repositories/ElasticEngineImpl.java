@@ -235,7 +235,7 @@ public class ElasticEngineImpl implements ElasticEngine{
 
         SearchResponse<Void> response = client.search(b -> b
                 .index("imdb")
-                .size(0)
+                .size(100)
                 .query(query)
                 .aggregations("nested", a-> a.nested(n->n.path("akas"))
                         .aggregations("regions",t->t.terms(m->m.field("akas.region")))), Void.class);

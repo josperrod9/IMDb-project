@@ -38,10 +38,11 @@ public class SearchController implements SearchAPI{
                                                         @RequestParam(defaultValue = "10.0") Optional<Double> maxScore,
                                                         @RequestParam(defaultValue = "100") Optional<Integer> maxNHits,
                                                         @RequestParam Optional<String> sortOrder,
-                                                        @RequestParam Optional<String> sortBy) {
+                                                        @RequestParam Optional<String> sortBy,
+                                                        @RequestParam Optional<String> region) {
         try {
             List<Movie> movies = searchService.allFiltersSearch(title, genres, type, maxYear, minYear,
-                    maxMinutes, minMinutes, maxScore, minScore, maxNHits, sortOrder, sortBy);
+                    maxMinutes, minMinutes, maxScore, minScore, maxNHits, sortOrder, sortBy,region);
             return ResponseEntity.ok(movies);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();

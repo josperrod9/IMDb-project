@@ -213,4 +213,11 @@ public class QueriesServiceImpl implements QueriesService{
                 .field(field))._toQuery();
         return matchPhrasePrefixQuery;
     }
+
+    public Query nestedQuery(String field,String value) {
+        Query nestedQuery = NestedQuery.of(n -> n
+                .path(field)
+                .query(q->q.term(t->t.field("akas.region").value(value))))._toQuery();
+        return nestedQuery;
+    }
 }
