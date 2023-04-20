@@ -14,15 +14,6 @@ services:
       interval: 30s
       retries: 10
 
-  cerebro:
-    image: lmenezes/cerebro
-    container_name: cerebro
-    hostname: "cerebro"
-    ports:
-      - "9000:9000"
-    command:
-      - -Dhosts.0.host=http://elasticsearch:9200
-
   search-api:
     container_name: imdb-api
     build:
