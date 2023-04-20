@@ -69,4 +69,10 @@ public class SearchController implements SearchAPI{
         }
     }
 
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, path = "/recent")
+    public ResponseEntity<List<String>> getRecentSearches() {
+        List<String> titles = searchService.getRecentTitles();
+        return ResponseEntity.ok(titles);
+    }
+
 }

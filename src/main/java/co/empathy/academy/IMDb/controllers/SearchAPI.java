@@ -5,12 +5,15 @@ import co.empathy.academy.IMDb.models.Movie;
 import co.empathy.academy.IMDb.models.facets.Facet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,4 +65,11 @@ public interface SearchAPI {
             @ApiResponse(responseCode = "500", description = "Error searching the regions")
     })
     ResponseEntity<Facet> getRegions();
+
+    @Operation(summary = "Get recent searches", tags = { "index" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved",content = @Content(schema = @Schema(implementation =String.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",content = @Content),
+            @ApiResponse(responseCode = "500", description = "Something went wrong while retrieving",content = @Content)})
+    ResponseEntity<List<String>> getRecentSearches() throws IOException;
 }

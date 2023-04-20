@@ -23,4 +23,6 @@ public interface SearchService {
     Facet getGenres() throws IOException;
 
     Facet getRegions() throws IOException;
+
+    List<String> getRecentTitles() throws IOException;
 }

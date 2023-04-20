@@ -21,6 +21,8 @@ public class SearchServiceImpl implements SearchService{
 
     private final QueriesService queriesService;
 
+    private final List<String>  recentTitles = new ArrayList<>();
+
     /**
      * Performs a search with all the filters
      *
@@ -51,7 +53,12 @@ public class SearchServiceImpl implements SearchService{
 
         List<Query> filters = new ArrayList<>();
 
-        title.ifPresent(s -> filters.add(queriesService.multiMatchQuery(s, "primaryTitle")));
+        title.ifPresent(s -> {
+            filters.add(queriesService.multiMatchQuery(s, "primaryTitle"));
+            recentTitles.add(title.get());
+        });
+
+
 
         if (genres.isPresent()) {
             String[] genresArray = genres.get().split(",");
@@ -121,5 +128,10 @@ public class SearchServiceImpl implements SearchService{
     @Override
     public Facet getRegions() throws IOException {
         return elasticEngine.getRegions();
+    }
+
+    @Override
+    public List<String> getRecentTitles() {
+        return recentTitles;
     }
 }

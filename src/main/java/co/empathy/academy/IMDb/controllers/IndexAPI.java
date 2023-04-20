@@ -27,13 +27,6 @@ public interface IndexAPI {
             @ApiResponse(responseCode = "500", description = "Something went wrong indexing the doc",content = @Content)})
     ResponseEntity<HttpStatus> indexDoc(@PathVariable String indexName, @RequestBody Movie movie) throws IOException;
 
-    @Operation(summary = "Get a single movie from an index", tags = { "index" })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved",content = @Content(schema = @Schema(implementation =Movie.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",content = @Content),
-            @ApiResponse(responseCode = "500", description = "Something went wrong while retrieving",content = @Content)})
-    public ResponseEntity<Movie> getDocFromIndex(@PathVariable String indexName) throws IOException;
-
     @Operation(summary = "Delete an indices", tags = { "index" })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted",content = @Content),
@@ -61,4 +54,5 @@ public interface IndexAPI {
             @ApiResponse(responseCode = "400", description = "Bad Request",content = @Content),
             @ApiResponse(responseCode = "500", description = "Something went wrong while retrieving",content = @Content)})
     public ResponseEntity<String> indexStatus(@PathVariable String taskName) throws ExecutionException, InterruptedException;
+
 }

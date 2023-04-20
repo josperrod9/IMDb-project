@@ -238,7 +238,7 @@ public class ElasticEngineImpl implements ElasticEngine{
                 .size(100)
                 .query(query)
                 .aggregations("nested", a-> a.nested(n->n.path("akas"))
-                        .aggregations("regions",t->t.terms(m->m.field("akas.region")))), Void.class);
+                        .aggregations("regions",t->t.terms(m->m.field("akas.region").size(10000)))), Void.class);
 
         List<FacetValue> values = new ArrayList<>();
         NestedAggregate regionsAgg = (NestedAggregate) response.aggregations().get("nested")._get();

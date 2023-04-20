@@ -2,7 +2,7 @@ version: "2"
 
 services:
   elasticsearch:
-    image: "josperrod17/imdb-api:elasticsearch"
+    image: "josperrod17/imdb-api:elasticsearch_v2"
     hostname: "elasticsearch"
     container_name: elasticsearch
     environment:
