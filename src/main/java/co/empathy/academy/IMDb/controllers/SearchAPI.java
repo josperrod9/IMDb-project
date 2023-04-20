@@ -45,7 +45,8 @@ public interface SearchAPI {
                                                  @RequestParam(defaultValue = "10.0") Optional<Double> maxScore,
                                                  @RequestParam(defaultValue = "100") Optional<Integer> maxNHits,
                                                  @RequestParam Optional<String> sortOrder,
-                                                 @RequestParam Optional<String> sortBy);
+                                                 @RequestParam Optional<String> sortBy,
+                                                 @RequestParam Optional<String> region);
 
     @Operation(summary = "Get all genres")
     @ApiResponses(value = {

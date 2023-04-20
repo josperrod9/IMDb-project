@@ -113,4 +113,6 @@ public interface QueriesService {
      * return Query to be executed
      */
     Query multiMatchQuery(String query, String field);
+
+    Query nestedQuery(String field,String value);
 }

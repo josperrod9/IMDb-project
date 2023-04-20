@@ -45,7 +45,8 @@ public class SearchServiceImpl implements SearchService{
                                         Optional<Integer> minYear, Optional<Integer> maxMinutes,
                                         Optional<Integer> minMinutes, Optional<Double> maxScore,
                                         Optional<Double> minScore, Optional<Integer> maxNHits,
-                                        Optional<String> sortOrder, Optional<String> sortBy) throws IOException {
+                                        Optional<String> sortOrder, Optional<String> sortBy,
+                                        Optional<String> region) throws IOException {
 
         List<Query> filters = new ArrayList<>();
 
@@ -76,6 +77,9 @@ public class SearchServiceImpl implements SearchService{
         if (maxScore.isPresent() || minScore.isPresent()) {
             filters.add(queriesService.rangeDoubleQuery("averageRating", minScore.orElse(0.0),
                     maxScore.orElse(Double.MAX_VALUE)));
+        }
+        if (region.isPresent()) {
+            filters.add(queriesService.nestedQuery("akas", region.get()));
         }
         List<SortOptions> sortOptions = new ArrayList<>() {{
             if (sortBy.isPresent() && sortOrder.isPresent()) {
