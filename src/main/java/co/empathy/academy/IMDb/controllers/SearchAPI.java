@@ -30,6 +30,7 @@ public interface SearchAPI {
     @Parameter(name = "maxNHits", description = "Maximum number of hits to return")
     @Parameter(name = "sortOrder", description = "asc or desc")
     @Parameter(name = "sortBy", description = "Sort by field. Can be 'primaryTitle', 'startYear', 'runtimeMinutes' or 'averageRating'")
+    @Parameter(name = "region", description = "Region of the movie. Can be for example 'US' or 'ES'")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of movies found, it can be empty"),
             @ApiResponse(responseCode = "500", description = "Error searching the movies")

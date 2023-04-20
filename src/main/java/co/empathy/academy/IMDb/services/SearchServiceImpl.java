@@ -36,6 +36,7 @@ public class SearchServiceImpl implements SearchService{
      * @param maxNHits   Maximum number of hits
      * @param sortOrder Sort by order (asc: ascending, desc: descending)
      * @param sortBy    Sort by field (primaryTitle, startYear, runtimeMinutes, averageRating)
+     * @param region    Region to search
      * @return List of movies that match the filters
      * @throws IOException If the query fails
      */
