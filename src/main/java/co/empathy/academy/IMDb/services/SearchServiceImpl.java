@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +19,7 @@ public class SearchServiceImpl implements SearchService{
 
     private final QueriesService queriesService;
 
-    private final List<String>  recentTitles = new ArrayList<>();
+    private final Deque<String> recentTitles = new ArrayDeque<>();
 
     /**
      * Performs a search with all the filters
@@ -55,7 +53,7 @@ public class SearchServiceImpl implements SearchService{
 
         title.ifPresent(s -> {
             filters.add(queriesService.multiMatchQuery(s, "primaryTitle"));
-            recentTitles.add(title.get());
+            recentTitles.addFirst(title.get());
         });
 
 
@@ -132,6 +130,8 @@ public class SearchServiceImpl implements SearchService{
 
     @Override
     public List<String> getRecentTitles() {
-        return recentTitles;
+        if (recentTitles.size() > 6)
+            recentTitles.removeLast();
+        return recentTitles.stream().toList();
     }
 }
