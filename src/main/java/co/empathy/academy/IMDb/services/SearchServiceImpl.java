@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +18,8 @@ public class SearchServiceImpl implements SearchService{
     private final ElasticEngine elasticEngine;
 
     private final QueriesService queriesService;
+
+    private final Deque<String> recentTitles = new ArrayDeque<>();
 
     /**
      * Performs a search with all the filters
@@ -36,6 +36,7 @@ public class SearchServiceImpl implements SearchService{
      * @param maxNHits   Maximum number of hits
      * @param sortOrder Sort by order (asc: ascending, desc: descending)
      * @param sortBy    Sort by field (primaryTitle, startYear, runtimeMinutes, averageRating)
+     * @param region    Region to search
      * @return List of movies that match the filters
      * @throws IOException If the query fails
      */
@@ -45,11 +46,17 @@ public class SearchServiceImpl implements SearchService{
                                         Optional<Integer> minYear, Optional<Integer> maxMinutes,
                                         Optional<Integer> minMinutes, Optional<Double> maxScore,
                                         Optional<Double> minScore, Optional<Integer> maxNHits,
-                                        Optional<String> sortOrder, Optional<String> sortBy) throws IOException {
+                                        Optional<String> sortOrder, Optional<String> sortBy,
+                                        Optional<String> region) throws IOException {
 
         List<Query> filters = new ArrayList<>();
 
-        title.ifPresent(s -> filters.add(queriesService.multiMatchQuery(s, "primaryTitle")));
+        title.ifPresent(s -> {
+            filters.add(queriesService.multiMatchQuery(s, "primaryTitle"));
+            recentTitles.addFirst(title.get());
+        });
+
+
 
         if (genres.isPresent()) {
             String[] genresArray = genres.get().split(",");
@@ -76,6 +83,9 @@ public class SearchServiceImpl implements SearchService{
         if (maxScore.isPresent() || minScore.isPresent()) {
             filters.add(queriesService.rangeDoubleQuery("averageRating", minScore.orElse(0.0),
                     maxScore.orElse(Double.MAX_VALUE)));
+        }
+        if (region.isPresent()) {
+            filters.add(queriesService.nestedQuery("akas", region.get()));
         }
         List<SortOptions> sortOptions = new ArrayList<>() {{
             if (sortBy.isPresent() && sortOrder.isPresent()) {
@@ -116,5 +126,12 @@ public class SearchServiceImpl implements SearchService{
     @Override
     public Facet getRegions() throws IOException {
         return elasticEngine.getRegions();
+    }
+
+    @Override
+    public List<String> getRecentTitles() {
+        if (recentTitles.size() > 6)
+            recentTitles.removeLast();
+        return recentTitles.stream().toList();
     }
 }

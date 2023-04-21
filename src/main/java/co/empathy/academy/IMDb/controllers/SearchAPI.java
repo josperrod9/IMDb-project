@@ -5,12 +5,15 @@ import co.empathy.academy.IMDb.models.Movie;
 import co.empathy.academy.IMDb.models.facets.Facet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +33,7 @@ public interface SearchAPI {
     @Parameter(name = "maxNHits", description = "Maximum number of hits to return")
     @Parameter(name = "sortOrder", description = "asc or desc")
     @Parameter(name = "sortBy", description = "Sort by field. Can be 'primaryTitle', 'startYear', 'runtimeMinutes' or 'averageRating'")
+    @Parameter(name = "region", description = "Region of the movie. Can be for example 'US' or 'ES'")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of movies found, it can be empty"),
             @ApiResponse(responseCode = "500", description = "Error searching the movies")
@@ -45,7 +49,8 @@ public interface SearchAPI {
                                                  @RequestParam(defaultValue = "10.0") Optional<Double> maxScore,
                                                  @RequestParam(defaultValue = "100") Optional<Integer> maxNHits,
                                                  @RequestParam Optional<String> sortOrder,
-                                                 @RequestParam Optional<String> sortBy);
+                                                 @RequestParam Optional<String> sortBy,
+                                                 @RequestParam Optional<String> region);
 
     @Operation(summary = "Get all genres")
     @ApiResponses(value = {
@@ -60,4 +65,11 @@ public interface SearchAPI {
             @ApiResponse(responseCode = "500", description = "Error searching the regions")
     })
     ResponseEntity<Facet> getRegions();
+
+    @Operation(summary = "Get recent searches", tags = { "index" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved",content = @Content(schema = @Schema(implementation =String.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",content = @Content),
+            @ApiResponse(responseCode = "500", description = "Something went wrong while retrieving",content = @Content)})
+    ResponseEntity<List<String>> getRecentSearches() throws IOException;
 }

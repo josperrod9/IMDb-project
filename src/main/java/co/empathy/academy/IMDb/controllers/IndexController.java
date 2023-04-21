@@ -31,11 +31,6 @@ public class IndexController implements IndexAPI{
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/{indexName}")
-    public ResponseEntity<Movie> getDocFromIndex(@PathVariable String indexName) {
-        Movie getIndexResponse = elasticService.getDocFromIndex(indexName);
-        return new ResponseEntity<>(getIndexResponse,HttpStatus.OK);
-    }
 
     @DeleteMapping("/{indexName}")
     public ResponseEntity<HttpStatus> deleteIndex(@PathVariable String indexName) {
@@ -52,8 +47,6 @@ public class IndexController implements IndexAPI{
                                            @RequestParam("akas") MultipartFile akasFile,
                                            @RequestParam("crew") MultipartFile crewFile,
                                            @RequestParam("principals") MultipartFile principalsFile) {
-
-
 
         try {
             LOGGER.info("Files received");
