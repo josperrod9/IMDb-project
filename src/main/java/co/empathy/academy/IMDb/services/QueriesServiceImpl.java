@@ -220,4 +220,12 @@ public class QueriesServiceImpl implements QueriesService{
                 .query(q->q.term(t->t.field("akas.region").value(value))))._toQuery();
         return nestedQuery;
     }
+
+    public Query nestedPrefixQuery(String field,String value, String region) {
+        Query nestedQuery = NestedQuery.of(n -> n
+                .path(field)
+                .query(q->q.term(t->t.field("akas.region").value(region)))
+                .query(q -> q.matchPhrasePrefix(t -> t.field("akas.title").query(value))))._toQuery();
+        return nestedQuery;
+    }
 }

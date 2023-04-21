@@ -49,14 +49,12 @@ public class SearchServiceImpl implements SearchService{
                                         Optional<String> sortOrder, Optional<String> sortBy,
                                         Optional<String> region) throws IOException {
 
-        List<Query> filters = new ArrayList<>();
+        Deque<Query> filters = new ArrayDeque<>();
 
         title.ifPresent(s -> {
             filters.add(queriesService.multiMatchQuery(s, "primaryTitle"));
             recentTitles.addFirst(title.get());
         });
-
-
 
         if (genres.isPresent()) {
             String[] genresArray = genres.get().split(",");
@@ -86,6 +84,11 @@ public class SearchServiceImpl implements SearchService{
         }
         if (region.isPresent()) {
             filters.add(queriesService.nestedQuery("akas", region.get()));
+            title.ifPresent(s ->
+                    {
+                        filters.removeFirst();
+                        filters.addFirst(queriesService.nestedPrefixQuery("akas", s, region.get()));
+                    });
         }
         List<SortOptions> sortOptions = new ArrayList<>() {{
             if (sortBy.isPresent() && sortOrder.isPresent()) {
@@ -99,7 +102,7 @@ public class SearchServiceImpl implements SearchService{
             }
         }};
 
-        Query query = queriesService.mustQuery(filters);
+        Query query = queriesService.mustQuery(filters.stream().toList());
 
         return elasticEngine.performQuery(queriesService.functionScoreQuery(query), maxNHits.orElse(100), sortOptions);
     }
