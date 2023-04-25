@@ -117,4 +117,5 @@ public interface QueriesService {
     Query nestedQuery(String field,String value);
 
     Query nestedPrefixQuery(String field,String value, String region);
+
 }

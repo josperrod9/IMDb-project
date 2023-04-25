@@ -83,11 +83,13 @@ public class SearchServiceImpl implements SearchService{
                     maxScore.orElse(Double.MAX_VALUE)));
         }
         if (region.isPresent()) {
-            filters.add(queriesService.nestedQuery("akas", region.get()));
+            Query regionQuery =(queriesService.nestedQuery("akas", region.get()));
             title.ifPresent(s ->
                     {
+                        Query titleRegionQuery = queriesService.nestedPrefixQuery("akas", s, region.get());
+                        List<Query> queries = Arrays.asList(regionQuery, titleRegionQuery);
                         filters.removeFirst();
-                        filters.addFirst(queriesService.nestedPrefixQuery("akas", s, region.get()));
+                        filters.addFirst(queriesService.mustQuery(queries));
                     });
         }
         List<SortOptions> sortOptions = new ArrayList<>() {{
