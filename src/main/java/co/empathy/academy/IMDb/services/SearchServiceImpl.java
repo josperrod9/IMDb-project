@@ -49,14 +49,12 @@ public class SearchServiceImpl implements SearchService{
                                         Optional<String> sortOrder, Optional<String> sortBy,
                                         Optional<String> region) throws IOException {
 
-        List<Query> filters = new ArrayList<>();
+        Deque<Query> filters = new ArrayDeque<>();
 
         title.ifPresent(s -> {
             filters.add(queriesService.multiMatchQuery(s, "primaryTitle"));
             recentTitles.addFirst(title.get());
         });
-
-
 
         if (genres.isPresent()) {
             String[] genresArray = genres.get().split(",");
@@ -85,7 +83,14 @@ public class SearchServiceImpl implements SearchService{
                     maxScore.orElse(Double.MAX_VALUE)));
         }
         if (region.isPresent()) {
-            filters.add(queriesService.nestedQuery("akas", region.get()));
+            Query regionQuery =(queriesService.nestedQuery("akas", region.get()));
+            title.ifPresent(s ->
+                    {
+                        Query titleRegionQuery = queriesService.nestedPrefixQuery("akas", s, region.get());
+                        List<Query> queries = Arrays.asList(regionQuery, titleRegionQuery);
+                        filters.removeFirst();
+                        filters.addFirst(queriesService.mustQuery(queries));
+                    });
         }
         List<SortOptions> sortOptions = new ArrayList<>() {{
             if (sortBy.isPresent() && sortOrder.isPresent()) {
@@ -99,7 +104,7 @@ public class SearchServiceImpl implements SearchService{
             }
         }};
 
-        Query query = queriesService.mustQuery(filters);
+        Query query = queriesService.mustQuery(filters.stream().toList());
 
         return elasticEngine.performQuery(queriesService.functionScoreQuery(query), maxNHits.orElse(100), sortOptions);
     }

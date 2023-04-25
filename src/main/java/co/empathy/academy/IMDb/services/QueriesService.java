@@ -115,4 +115,7 @@ public interface QueriesService {
     Query multiMatchQuery(String query, String field);
 
     Query nestedQuery(String field,String value);
+
+    Query nestedPrefixQuery(String field,String value, String region);
+
 }
